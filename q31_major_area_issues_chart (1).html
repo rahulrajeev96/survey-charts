@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Major Area Issues – Survey Analysis</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --c1: #2D6A4F;
+    --c2: #E76F51;
+    --c3: #457B9D;
+    --c4: #E9C46A;
+    --c5: #264653;
+    --bg: #F8F5F0;
+    --card: #FFFFFF;
+    --text: #1a1a1a;
+    --sub: #666;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .wrapper { max-width: 820px; width: 100%; }
+
+  .header {
+    text-align: center;
+    margin-bottom: 36px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.1s;
+  }
+
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(22px, 4vw, 32px);
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .header p {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--sub);
+    font-weight: 300;
+    letter-spacing: 0.5px;
+  }
+
+  .badge {
+    display: inline-block;
+    background: var(--c1);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 4px 40px rgba(0,0,0,0.07);
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.3s;
+  }
+
+  .chart-layout {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .pie-wrap {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    flex-shrink: 0;
+  }
+
+  svg.pie {
+    width: 300px;
+    height: 300px;
+    transform: rotate(-90deg);
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.12));
+  }
+
+  .pie-segment {
+    stroke: white;
+    stroke-width: 2;
+    transition: opacity 0.2s, transform 0.2s;
+    transform-origin: 150px 150px;
+    transform-box: fill-box;
+    cursor: pointer;
+  }
+
+  .pie-segment:hover {
+    opacity: 0.85;
+    transform: scale(1.04);
+  }
+
+  .center-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+    transition: all 0.3s ease;
+  }
+
+  .center-label .cl-count {
+    font-family: 'DM Serif Display', serif;
+    font-size: 36px;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .center-label .cl-label {
+    font-size: 11px;
+    color: var(--sub);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    max-width: 90px;
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  .legend {
+    flex: 1;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 380px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 10px 14px;
+    border-radius: 10px;
+    transition: background 0.2s;
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards;
+  }
+
+  .legend-item:hover { background: #f5f5f5; }
+
+  .legend-item:nth-child(1)  { animation-delay: 1.2s; }
+  .legend-item:nth-child(2)  { animation-delay: 1.35s; }
+  .legend-item:nth-child(3)  { animation-delay: 1.5s; }
+  .legend-item:nth-child(4)  { animation-delay: 1.65s; }
+  .legend-item:nth-child(5)  { animation-delay: 1.8s; }
+  .legend-item:nth-child(6)  { animation-delay: 1.95s; }
+  .legend-item:nth-child(7)  { animation-delay: 2.1s; }
+  .legend-item:nth-child(8)  { animation-delay: 2.25s; }
+  .legend-item:nth-child(9)  { animation-delay: 2.4s; }
+  .legend-item:nth-child(10) { animation-delay: 2.55s; }
+  .legend-item:nth-child(11) { animation-delay: 2.7s; }
+  .legend-item:nth-child(12) { animation-delay: 2.85s; }
+
+  .legend-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .legend-text { flex: 1; }
+  .legend-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .legend-sub  { font-size: 11px; color: var(--sub); margin-top: 1px; }
+
+  .legend-pct {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="header">
+    <span class="badge">Survey Analysis · Q31</span>
+    <h1>Major Area Issues in<br>Settlement Study</h1>
+    <p>237 Households · Coastal Settlements, Thiruvananthapuram · 2026</p>
+  </div>
+
+  <div class="card">
+    <div class="chart-layout">
+      <div class="pie-wrap">
+        <svg class="pie" viewBox="0 0 300 300" id="pieChart"></svg>
+        <div class="center-label" id="centerLabel">
+          <div class="cl-count">237</div>
+          <div class="cl-label">Total Households</div>
+        </div>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const data = [
+  { label: "Waste",                          count: 139, color: "#2D6A4F" },
+  { label: "No Issues",                      count: 65,  color: "#E9C46A" },
+  { label: "Coastal Flooding",               count: 10,  color: "#457B9D" },
+  { label: "Flooding & Waste",               count: 5,   color: "#E76F51" },
+  { label: "Waste & Noise",                  count: 5,   color: "#A8DADC" },
+  { label: "Traffic",                        count: 6,   color: "#6D6875" },
+  { label: "Coastal Erosion",                count: 2,   color: "#F4A261" },
+  { label: "Noise",                          count: 1,   color: "#264653" },
+  { label: "Storm Surge / High Tide",        count: 1,   color: "#B5838D" },
+  { label: "Traffic & Waste",                count: 1,   color: "#52B788" },
+  { label: "Maintenance & Lack of Shops",    count: 1,   color: "#C77DFF" },
+  { label: "Water Leakage",                  count: 1,   color: "#F9C74F" },
+];
+
+const total = data.reduce((s, d) => s + d.count, 0);
+const cx = 150, cy = 150, r = 120, innerR = 68;
+
+function polarToCart(cx, cy, r, angle) {
+  return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
+}
+
+function makeArc(cx, cy, r, innerR, startAngle, endAngle) {
+  const o1 = polarToCart(cx, cy, r, startAngle);
+  const o2 = polarToCart(cx, cy, r, endAngle);
+  const i1 = polarToCart(cx, cy, innerR, endAngle);
+  const i2 = polarToCart(cx, cy, innerR, startAngle);
+  const large = endAngle - startAngle > Math.PI ? 1 : 0;
+  return `M ${o1.x} ${o1.y} A ${r} ${r} 0 ${large} 1 ${o2.x} ${o2.y} L ${i1.x} ${i1.y} A ${innerR} ${innerR} 0 ${large} 0 ${i2.x} ${i2.y} Z`;
+}
+
+const svg = document.getElementById('pieChart');
+const legend = document.getElementById('legend');
+const centerLabel = document.getElementById('centerLabel');
+
+let cumulative = 0;
+const segmentEls = [];
+
+data.forEach((d, i) => {
+  const pct = d.count / total;
+  const startAngle = cumulative * 2 * Math.PI;
+  const endAngle   = (cumulative + pct) * 2 * Math.PI;
+  cumulative += pct;
+
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", makeArc(cx, cy, r, innerR, startAngle, endAngle));
+  path.setAttribute("fill", d.color);
+  path.classList.add("pie-segment");
+  path.style.opacity = "0";
+  path.style.transition = `opacity 0.4s ease ${0.6 + i * 0.15}s`;
+
+  path.addEventListener("mouseenter", () => {
+    centerLabel.querySelector('.cl-count').textContent = d.count;
+    centerLabel.querySelector('.cl-label').textContent = d.label;
+    segmentEls.forEach((el, j) => { el.style.opacity = j === i ? "1" : "0.3"; });
+  });
+  path.addEventListener("mouseleave", () => {
+    centerLabel.querySelector('.cl-count').textContent = total;
+    centerLabel.querySelector('.cl-label').textContent = "Total Households";
+    segmentEls.forEach(el => { el.style.opacity = "1"; });
+  });
+
+  svg.appendChild(path);
+  segmentEls.push(path);
+
+  const pctStr = (pct * 100).toFixed(1);
+  const item = document.createElement('div');
+  item.className = 'legend-item';
+  item.innerHTML = `
+    <div class="legend-dot" style="background:${d.color}"></div>
+    <div class="legend-text">
+      <div class="legend-name">${d.label}</div>
+      <div class="legend-sub">${d.count} households</div>
+    </div>
+    <div class="legend-pct" style="color:${d.color}">${pctStr}%</div>
+  `;
+  item.addEventListener("mouseenter", () => {
+    centerLabel.querySelector('.cl-count').textContent = d.count;
+    centerLabel.querySelector('.cl-label').textContent = d.label;
+    segmentEls.forEach((el, j) => { el.style.opacity = j === i ? "1" : "0.3"; });
+  });
+  item.addEventListener("mouseleave", () => {
+    centerLabel.querySelector('.cl-count').textContent = total;
+    centerLabel.querySelector('.cl-label').textContent = "Total Households";
+    segmentEls.forEach(el => { el.style.opacity = "1"; });
+  });
+  legend.appendChild(item);
+});
+
+requestAnimationFrame(() => {
+  segmentEls.forEach(el => { el.style.opacity = "1"; });
+});
+</script>
+</body>
+</html>
